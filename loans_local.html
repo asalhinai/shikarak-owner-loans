@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل القروض - شي كراك</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f4f0;color:#1a1a1a;min-height:100vh;padding:1rem}
+.container{max-width:600px;margin:0 auto}
+h1{font-size:20px;font-weight:700;margin-bottom:1.25rem;color:#3E1F00}
+.top-card{background:#fff;border-radius:16px;border:0.5px solid #e0ddd6;padding:1.25rem;margin-bottom:1rem}
+.total-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.total-label{font-size:12px;color:#888;margin-bottom:4px}
+.total-amount{font-size:28px;font-weight:700;color:#E24B4A}
+.total-amount.zero{color:#1D9E75}
+.total-ret{font-size:20px;font-weight:600;color:#1D9E75}
+.branch-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid #ede9e0}
+.bstat{text-align:center;background:#f8f7f3;border-radius:10px;padding:8px}
+.bstat .bv{font-size:14px;font-weight:600}
+.bstat .bl{font-size:11px;color:#888;margin-top:2px}
+.pay-row{display:flex;gap:8px}
+.pay-row input{flex:1;border:0.5px solid #d0cdc4;border-radius:10px;padding:10px 12px;font-size:15px;background:#fff;outline:none}
+.pay-row input:focus{border-color:#1D9E75}
+.btn-pay{background:#1D9E75;border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer}
+.form-card{background:#fff;border-radius:16px;border:0.5px solid #e0ddd6;padding:1.25rem;margin-bottom:1rem}
+.sec-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid #d0cdc4;border-radius:20px;padding:6px 14px;font-size:13px;color:#666;cursor:pointer;background:#fff;transition:all .15s}
+.chip.sel-green{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56;font-weight:600}
+.chip.sel-blue{border-color:#378ADD;background:#E6F1FB;color:#185FA5;font-weight:600}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.frow.full{grid-template-columns:1fr}
+.field label{font-size:12px;color:#888;display:block;margin-bottom:5px}
+.field input{width:100%;border:0.5px solid #d0cdc4;border-radius:10px;padding:9px 12px;font-size:14px;outline:none;background:#fff}
+.field input:focus{border-color:#1D9E75}
+.btn-row{display:flex;gap:8px;margin-top:4px}
+.btn-add{flex:1;background:#1D9E75;border:none;color:#fff;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-clear{background:#fff;border:0.5px solid #d0cdc4;border-radius:10px;padding:10px 16px;font-size:14px;cursor:pointer;color:#888}
+.filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.fb{font-size:12px;padding:5px 14px;border-radius:20px;border:0.5px solid #d0cdc4;cursor:pointer;background:#fff;color:#888}
+.fb.act{border-color:#1a1a1a;color:#1a1a1a;font-weight:600}
+.loans-list{display:flex;flex-direction:column;gap:8px;margin-bottom:2rem}
+.loan-row{background:#fff;border:0.5px solid #e0ddd6;border-radius:14px;padding:1rem 1.25rem}
+.lh{display:flex;justify-content:space-between;align-items:flex-start}
+.lamount{font-size:18px;font-weight:700}
+.lamount.d{color:#E24B4A}
+.lamount.s{color:#1D9E75}
+.lmeta{display:flex;gap:10px;font-size:12px;color:#888;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.bp{background:#FCEBEB;color:#A32D2D}
+.br{background:#E1F5EE;color:#0F6E56}
+.bx{background:#FAEEDA;color:#854F0B}
+.progress-bar{height:4px;background:#ede9e0;border-radius:2px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:2px}
+.lnote{font-size:13px;color:#888;margin-top:8px;padding-top:8px;border-top:0.5px solid #ede9e0}
+.pay-hist{margin-top:8px;padding-top:8px;border-top:0.5px solid #ede9e0}
+.pay-hist-title{font-size:11px;color:#aaa;margin-bottom:4px}
+.pay-hist-row{display:flex;justify-content:space-between;font-size:12px;color:#888;padding:2px 0}
+.pay-hist-row .pa{color:#1D9E75;font-weight:600}
+.la{display:flex;gap:6px;margin-top:10px}
+.bsm{font-size:12px;padding:6px 12px;border-radius:8px;border:0.5px solid #d0cdc4;cursor:pointer;background:#fff;color:#555}
+.bsm.g{background:#E1F5EE;border-color:#9FE1CB;color:#0F6E56}
+.bsm.r{color:#E24B4A;border-color:#F7C1C1}
+.empty{text-align:center;padding:2rem;color:#aaa;font-size:14px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+.branch-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-left:4px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💰 سجل القروض — شي كراك</h1>
+  <div id="app"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var STORE = 'sk_loans_v2';
+var loans = JSON.parse(localStorage.getItem(STORE) || '[]');
+var selCard = '', selBranch = '', filterStatus = 'all', filterBranch = 'all';
+
+function save() { localStorage.setItem(STORE, JSON.stringify(loans)); }
+
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  var p = d.split('-');
+  if (p.length === 3) return p[2]+'/'+p[1]+'/'+p[0];
+  return d;
+}
+
+function branchColor(b) {
+  if (b === 'الخوض') return '#C8962E';
+  if (b === 'الحيل') return '#1E6B3C';
+  if (b === 'بركاء') return '#185FA5';
+  return '#888';
+}
+
+function cardIcon(c) {
+  return c === 'راتب' ? '💳' : c === 'استثمار' ? '🏦' : '🛡️';
+}
+
+function addLoan() {
+  if (!selBranch) { toast('اختر الفرع'); return; }
+  if (!selCard) { toast('اختر البطاقة'); return; }
+  var amt = parseFloat(document.getElementById('inp-amt').value);
+  if (!amt || amt <= 0) { toast('أدخل مبلغاً صحيحاً'); return; }
+  var date = document.getElementById('inp-date').value;
+  var reason = document.getElementById('inp-reason').value.trim();
+  loans.unshift({
+    id: Date.now().toString(),
+    date: date, branch: selBranch, card: selCard,
+    amount: amt, returned: 0, payments: [], status: 'pending', reason: reason
+  });
+  save(); selCard = ''; selBranch = ''; render();
+  toast('تم تسجيل القرض ✓');
+}
+
+function doQuickPay() {
+  var amt = parseFloat(document.getElementById('quickPay').value);
+  if (!amt || amt <= 0) { toast('أدخل مبلغاً'); return; }
+  var remaining = amt;
+  var today = new Date().toISOString().split('T')[0];
+  loans = loans.map(function(l) {
+    if (remaining <= 0 || l.status === 'returned') return l;
+    var pay = Math.min(l.amount - l.returned, remaining);
+    remaining -= pay;
+    var newRet = l.returned + pay;
+    return Object.assign({}, l, {
+      returned: newRet,
+      payments: (l.payments || []).concat([{date: today, amount: pay}]),
+      status: newRet >= l.amount ? 'returned' : 'partial'
+    });
+  });
+  save(); render();
+  toast('تم تسجيل الدفع ✓');
+}
+
+function markFull(id) {
+  var today = new Date().toISOString().split('T')[0];
+  loans = loans.map(function(l) {
+    if (l.id !== id) return l;
+    var rem = l.amount - l.returned;
+    return Object.assign({}, l, {
+      returned: l.amount,
+      payments: (l.payments || []).concat(rem > 0 ? [{date: today, amount: rem}] : []),
+      status: 'returned'
+    });
+  });
+  save(); render(); toast('تم ✓');
+}
+
+function deleteLoan(id) {
+  if (!confirm('تأكيد الحذف؟')) return;
+  loans = loans.filter(function(l){ return l.id !== id; });
+  save(); render(); toast('تم الحذف');
+}
+
+function setSel(type, val) {
+  if (type === 'card') selCard = val;
+  else selBranch = val;
+  render();
+}
+
+function setF(type, val) {
+  if (type === 'status') filterStatus = val;
+  else filterBranch = val;
+  render();
+}
+
+function render() {
+  var totalPending = 0, totalRet = 0;
+  var bp = {الخوض: 0, الحيل: 0, بركاء: 0};
+  loans.forEach(function(l) {
+    var rem = l.amount - l.returned;
+    totalPending += rem; totalRet += l.returned;
+    if (bp[l.branch] !== undefined) bp[l.branch] += rem;
+    else if (l.branch === 'عام') { bp['الخوض'] += rem/3; bp['الحيل'] += rem/3; bp['بركاء'] += rem/3; }
+  });
+
+  var filtered = loans.filter(function(l) {
+    return (filterStatus === 'all' || l.status === filterStatus) &&
+           (filterBranch === 'all' || l.branch === filterBranch);
+  });
+
+  var today = new Date().toISOString().split('T')[0];
+  var html = '';
+
+  // Summary
+  html += '<div class="top-card">';
+  html += '<div class="total-row">';
+  html += '<div><div class="total-label">إجمالي مستحق للمالك</div>';
+  html += '<div class="total-amount' + (totalPending <= 0 ? ' zero' : '') + '">' + totalPending.toFixed(3) + ' OMR</div></div>';
+  html += '<div style="text-align:left"><div class="total-label">مسترجَع</div>';
+  html += '<div class="total-ret">' + totalRet.toFixed(3) + ' OMR</div></div></div>';
+  html += '<div class="branch-stats">';
+  html += '<div class="bstat"><div class="bv" style="color:#C8962E">' + bp['الخوض'].toFixed(3) + '</div><div class="bl">الخوض</div></div>';
+  html += '<div class="bstat"><div class="bv" style="color:#1E6B3C">' + bp['الحيل'].toFixed(3) + '</div><div class="bl">الحيل</div></div>';
+  html += '<div class="bstat"><div class="bv" style="color:#185FA5">' + bp['بركاء'].toFixed(3) + '</div><div class="bl">بركاء</div></div>';
+  html += '</div>';
+  html += '<div class="pay-row"><input type="number" id="quickPay" placeholder="المبلغ المدفوع (OMR)" step="0.001" min="0">';
+  html += '<button class="btn-pay" onclick="doQuickPay()">💵 دفع</button></div></div>';
+
+  // Form
+  html += '<div class="form-card"><div class="sec-title">تسجيل قرض جديد</div>';
+  html += '<div style="margin-bottom:10px"><div style="font-size:12px;color:#888;margin-bottom:6px">الفرع</div><div class="chips">';
+  ['الخوض','الحيل','بركاء','عام'].forEach(function(b) {
+    html += '<button class="chip' + (selBranch === b ? ' sel-blue' : '') + '" onclick="setSel(\'branch\',\'' + b + '\')">' + b + '</button>';
+  });
+  html += '</div></div>';
+  html += '<div style="margin-bottom:10px"><div style="font-size:12px;color:#888;margin-bottom:6px">البطاقة</div><div class="chips">';
+  ['راتب','استثمار','طوارئ'].forEach(function(c) {
+    html += '<button class="chip' + (selCard === c ? ' sel-green' : '') + '" onclick="setSel(\'card\',\'' + c + '\')">' + cardIcon(c) + ' بطاقة ' + c + '</button>';
+  });
+  html += '</div></div>';
+  html += '<div class="frow"><div class="field"><label>المبلغ (OMR)</label><input type="number" id="inp-amt" placeholder="0.000" step="0.001" min="0"></div>';
+  html += '<div class="field"><label>التاريخ</label><input type="date" id="inp-date" value="' + today + '"></div></div>';
+  html += '<div class="frow full"><div class="field"><label>السبب (اختياري)</label><input type="text" id="inp-reason" placeholder="مثال: رواتب، مشتريات..."></div></div>';
+  html += '<div class="btn-row"><button class="btn-clear" onclick="selCard=\'\';selBranch=\'\';render()">مسح</button>';
+  html += '<button class="btn-add" onclick="addLoan()">+ تسجيل</button></div></div>';
+
+  // Filters
+  html += '<div class="filter-row">';
+  [{f:'all',l:'الكل'},{f:'pending',l:'معلق'},{f:'partial',l:'جزئي'},{f:'returned',l:'مكتمل'}].forEach(function(x) {
+    html += '<button class="fb' + (filterStatus === x.f ? ' act' : '') + '" onclick="setF(\'status\',\'' + x.f + '\')">' + x.l + '</button>';
+  });
+  html += '</div><div class="filter-row">';
+  [{f:'all',l:'كل الفروع'},{f:'الخوض',l:'الخوض'},{f:'الحيل',l:'الحيل'},{f:'بركاء',l:'بركاء'},{f:'عام',l:'عام'}].forEach(function(x) {
+    html += '<button class="fb' + (filterBranch === x.f ? ' act' : '') + '" onclick="setF(\'branch\',\'' + x.f + '\')">' + x.l + '</button>';
+  });
+  html += '</div>';
+
+  // List
+  html += '<div class="loans-list">';
+  if (!filtered.length) {
+    html += '<div class="empty">📋 لا توجد سجلات</div>';
+  } else {
+    filtered.forEach(function(l) {
+      var rem = l.amount - l.returned;
+      var pct = l.amount > 0 ? Math.round((l.returned / l.amount) * 100) : 0;
+      var amtCls = l.status === 'returned' ? 's' : 'd';
+      var bdgCls = l.status === 'returned' ? 'br' : l.status === 'partial' ? 'bx' : 'bp';
+      var bdgTxt = l.status === 'returned' ? 'مرتجع' : l.status === 'partial' ? 'جزئي' : 'معلق';
+      var payments = l.payments || [];
+      html += '<div class="loan-row">';
+      html += '<div class="lh"><div>';
+      html += '<div class="lamount ' + amtCls + '">' + l.amount.toFixed(3) + ' OMR</div>';
+      html += '<div class="lmeta">';
+      html += '<span style="color:' + branchColor(l.branch) + ';font-weight:600"><span class="branch-dot" style="background:' + branchColor(l.branch) + '"></span>' + l.branch + '</span>';
+      html += '<span>' + cardIcon(l.card) + ' ' + l.card + '</span>';
+      html += '<span>📅 ' + fmtDate(l.date) + '</span>';
+      if (rem > 0 && l.status !== 'returned') html += '<span style="color:#E24B4A">متبقي ' + rem.toFixed(3) + '</span>';
+      html += '</div></div><span class="badge ' + bdgCls + '">' + bdgTxt + '</span></div>';
+      html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+      if (l.reason) html += '<div class="lnote">📝 ' + l.reason + '</div>';
+      if (payments.length) {
+        html += '<div class="pay-hist"><div class="pay-hist-title">سجل الدفعات</div>';
+        payments.forEach(function(p) {
+          html += '<div class="pay-hist-row"><span>' + fmtDate(p.date) + '</span><span class="pa">+' + p.amount.toFixed(3) + ' OMR</span></div>';
+        });
+        html += '</div>';
+      }
+      html += '<div class="la">';
+      if (l.status !== 'returned') html += '<button class="bsm g" onclick="markFull(\'' + l.id + '\')">✓ مرتجع كلياً</button>';
+      html += '<button class="bsm r" onclick="deleteLoan(\'' + l.id + '\')">🗑</button>';
+      html += '</div></div>';
+    });
+  }
+  html += '</div>';
+  document.getElementById('app').innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
